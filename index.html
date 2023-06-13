@@ -10,13 +10,13 @@
 <body x-data="timer()" class="p-4 bg-yellow-500">
 
     <div class="flex start w-md">
-        <div class="bg-red-600 px-3 py-1 w-[100px] text-center rounded-l-sm">Wales</div>
+        <div class="bg-red-600 px-3 py-1 w-[100px] text-center rounded-l-sm text-white bg-center bg-cover">Wales</div>
         <div class="bg-white flex py-1 px-2">
             <div class="text-black w-[30px] text-center font-semibold" x-text="score().home">20</div>
             <div class="text-black px-2">|</div>
             <div class="text-black w-[30px] text-center font-semibold" x-text="score().away">5</div>
         </div>
-        <div class="bg-green-600 px-3 py-1 w-[100px] text-center">Ireland</div>
+        <div class="bg-green-600 px-3 py-1 w-[100px] text-center text-white">Ireland</div>
         <div class="bg-gray-800 text-center w-[65px] py-1 timer rounded-r-sm" x-bind:class="lessThanMinuteRemaining ? 'text-gray-600' : 'text-white'">
             <span class="minutes text-right" x-text="time().minutes"></span>:<span class="seconds text-left" x-text="time().seconds"></span>
         </div>
