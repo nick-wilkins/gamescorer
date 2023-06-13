@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+</head>
+<body x-data="timer()" class="p-4 bg-yellow-500">
+
+    <div class="flex start w-md">
+        <div class="bg-red-600 px-3 py-1 w-[100px] text-center rounded-l-sm">Wales</div>
+        <div class="bg-white flex py-1 px-2">
+            <div class="text-black w-[30px] text-center font-semibold" x-text="score().home">20</div>
+            <div class="text-black px-2">|</div>
+            <div class="text-black w-[30px] text-center font-semibold" x-text="score().away">5</div>
+        </div>
+        <div class="bg-green-600 px-3 py-1 w-[100px] text-center">Ireland</div>
+        <div class="bg-gray-800 text-center w-[65px] py-1 timer rounded-r-sm" x-bind:class="lessThanMinuteRemaining ? 'text-gray-600' : 'text-white'">
+            <span class="minutes text-right" x-text="time().minutes"></span>:<span class="seconds text-left" x-text="time().seconds"></span>
+        </div>
+    </div>
+
+    <div class="controls flex-col gap-y-2 bg-gray-100  mt-10 p-4">
+
+        <div class="timerControls flex-col gap-y-2 bg-gray-200 p-4">
+            <button x-on:click="togglePausedTimer()" class="bg-gray-600 px-4 py-2 text-white mb-2 rounded-md">Start / stop clock</button>
+            <div class="text-gray-800">Set time to: &nbsp;
+                <input type="number" class="minutesInput py-1 px-3" value="0" min="0" max="10" step="1" x-model="setMinutes" />&nbsp;
+                <input type="number" class="secondsInput py-1 px-3"  min="0" max="59" step="1" x-model="setSeconds" />&nbsp;
+
+                <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateMinutesSeconds()">Update</button>
+            </div>
+            <button x-on:click="resetClock()" class="bg-gray-600 px-4 py-2 text-white mb-2 rounded-md mt-2">Reset back to 10:00</button>
+        </div>
+        <div class="scoreControls flex flex-row gap-x-12 mt-4 bg-gray-200  p-4">
+
+            <div class="flex-col">
+                <div>Home</div>
+                <div>
+                    <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateHomeScore(1)">+</button>
+                    <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateHomeScore(-1)">-</button>
+                </div>
+            </div>
+            <div class="flex-col">
+                <div>Away</div>
+                <div>
+                    <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateAwayScore(1)">+</button>
+                    <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateAwayScore(-1)">-</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function timer() {
+            return {
+                secondsLeft : 10 * 60,
+                timeIsPaused: true,
+                lessThanMinuteRemaining: false,
+                homeScore : 0,
+                awayScore : 0,
+                setSeconds: 0,
+                setMinutes: 0,
+
+                /* Timer work */
+                init() {
+                    this.timer = setInterval(() => {
+                        if(!this.timeIsPaused) {
+                            this.secondsLeft--;
+                        }
+                    }, 1000);
+                },
+                resetClock() {
+                    this.secondsLeft = 10 * 60;
+                },
+                togglePausedTimer() {
+                    console.log("Pausing / unpausing");
+                    this.timeIsPaused = !this.timeIsPaused;
+                },
+
+                minutes() {
+                    return {
+                        value:Math.floor(this.secondsLeft / 60)
+                    };
+                },
+                seconds() {
+                    return {
+                        value:this.secondsLeft % 60
+                    };
+                },
+                format(value) {
+                    return ("0" + parseInt(value)).slice(-2)
+                },
+                updateMinutesSeconds() {
+                    this.secondsLeft = parseInt(this.setMinutes * 60) + parseInt(this.setSeconds);
+                },
+                time() {
+                    if(this.minutes().value < 1) {
+                        this.lessThanMinuteRemaining = true;
+                        return {
+                            minutes: '01',
+                            seconds: '00'
+                        }
+                    } else {
+                        this.lessThanMinuteRemaining = false;
+                        return {
+                            minutes: this.format(this.minutes().value),
+                            seconds: this.format(this.seconds().value),
+                        }
+                    }
+                },
+
+                updateHomeScore(number) {
+                    this.homeScore += number;
+                    if(this.homeScore < 0) {
+                        this.homeScore = 0;
+                    }
+                },
+                updateAwayScore(number) {
+                    this.awayScore += number;
+                    if(this.awayScore < 0) {
+                        this.awayScore = 0;
+                    }
+                },
+                score() {
+                    return {
+                        home: this.homeScore,
+                        away: this.awayScore,
+                    }
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>
