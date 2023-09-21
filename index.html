@@ -4,54 +4,132 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="js/alpine.js"></script>
 
 </head>
-<body x-data="timer()" class="p-4 bg-yellow-500">
+<body x-data="timer()" class="p-4 mt-8 bg-yellow-500">
+    <div class="flex flex-col relative">
+        <div class="flex flex-row justify-center items-center gap-x-4">
+            <div class="">
+                <img src="img/championsleague.png" style="width: 50px">
+            </div>
+            <div class="flex start w-md">
+                <div class="text-center rounded-l-sm text-black bg-center bg-cover bg-white flex flex-row items-center opacity-90">
+                    <div><img x-bind:src="hometeam.flag" class="block h-[32px] rounded-l-sm" /></div>
+                    <div x-html="hometeam.name" class="px-3 py-1 w-[100px] "></div>
+                </div>
 
-    <div class="flex start w-md">
-        <div x-show="homeTeam == 'wales'" class="bg-red-600 px-3 py-1 w-[100px] text-center rounded-l-sm text-white bg-center bg-cover">Wales</div>
-        <div x-show="homeTeam == 'ireland'" class="bg-green-600 px-3 py-1 w-[100px] text-center rounded-l-sm text-white bg-center bg-cover">Ireland</div>
-        <div x-show="homeTeam == 'scotland'" class="bg-blue-600 px-3 py-1 w-[100px] text-center rounded-l-sm text-white bg-center bg-cover">Scotland</div>
-        <div class="bg-white flex py-1 px-2">
-            <div class="text-black w-[30px] text-center font-semibold" x-text="score().home">20</div>
-            <div class="text-black px-2">|</div>
-            <div class="text-black w-[30px] text-center font-semibold" x-text="score().away">5</div>
+                <div class="bg-white flex py-1 px-2 items-center relative">
+                    <div class="text-black w-[30px] text-center font-semibold" x-text="score().home">0</div>
+                    <div class="text-black px-2"><img src="img/ikf-logo.png" class="w-[20px]"/></div>
+                    <div class="text-black w-[30px] text-center font-semibold" x-text="score().away">0</div>
+                </div>
+
+                <div class="text-center rounded-r-sm text-black bg-center bg-cover bg-white flex flex-row items-center opacity-90">
+                    <div x-html="awayteam.name" class="px-3 py-1 w-[100px] "></div>
+                    <div><img x-bind:src="awayteam.flag" class="block h-[32px] rounded-r-sm" /></div>
+                </div>
+
+            </div>
         </div>
-        <div x-show="awayTeam == 'ireland'" class="bg-green-600 px-3 py-1 w-[100px] text-center text-white">Ireland</div>
-        <div x-show="awayTeam == 'wales'" class="bg-red-600 px-3 py-1 w-[100px] text-center text-white">Wales</div>
-        <div x-show="awayTeam == 'scotland'" class="bg-blue-600 px-3 py-1 w-[100px] text-center text-white">Scotland</div>
-        <div class="bg-gray-800 text-center w-[65px] py-1 timer rounded-r-sm" x-bind:class="lessThanMinuteRemaining ? 'text-gray-600' : 'text-white'">
-            <span class="minutes text-right" x-text="time().minutes"></span>:<span class="seconds text-left" x-text="time().seconds"></span>
+
+
+        <div class="flex flex-row justify-center items-center ml-[65px]">
+            <div class="bg-gray-800 text-center w-[85px] py-1 timer rounded-br-lg rounded-bl-lg flex flex-row items-center justify-center gap-x-2" x-bind:class="lessThanMinuteRemaining ? 'text-gray-600' : 'text-white'">
+                <span class="quarter text-gray-400 text-xs" x-html="quarterNumber()"></span>
+                <div>
+                    <span class="minutes text-right" x-text="time().minutes"></span>:<span class="seconds text-left" x-text="time().seconds"></span>
+                </div>
+            </div>
         </div>
+
+        <div><img :src="goalImage" alt="" class="absolute left-[49.5%] w-[80px] -top-[40px]"  x-show="showGoal"
+                  x-transition:enter="transition ease-out duration-300"
+                  x-transition:enter-start="opacity-0 scale-90"
+                  x-transition:enter-end="opacity-100 scale-100"
+                  x-transition:leave="transition ease-in duration-300"
+                  x-transition:leave-start="opacity-100 scale-100"
+                  x-transition:leave-end="opacity-0 scale-90"
+        ></div>
     </div>
 
-    <div class="controls flex-col gap-y-2 bg-gray-100  mt-10 p-4">
+
+    <div class="controls flex-col gap-y-2 bg-gray-100  mt-20 p-4">
 
         <div class="timerControls flex-col gap-y-2 bg-gray-200 p-4">
-            <button x-on:click="togglePausedTimer()" class="bg-gray-600 px-4 py-2 text-white mb-2 rounded-md">Start / stop clock</button>
+            <h4 class="text-lg font-bold mb-4">Timer <span class="font-normal text-sm">(currently <span x-html="timerRunningWords()"></span>)</span></h4>
+            <button x-on:click="togglePausedTimer()" class="bg-gray-600 px-4 py-2 text-white mb-2 rounded-md hover:opacity-60">Start / stop clock</button>
             <div class="text-gray-800">Set time to: &nbsp;
                 <input type="number" class="minutesInput py-1 px-3" value="0" min="0" max="10" step="1" x-model="setMinutes" />&nbsp;
                 <input type="number" class="secondsInput py-1 px-3"  min="0" max="59" step="1" x-model="setSeconds" />&nbsp;
 
-                <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateMinutesSeconds()">Update</button>
+                <button class="bg-gray-600 p-1 px-3 rounded-md text-white hover:opacity-60" x-on:click="updateMinutesSeconds()">Update</button>
             </div>
-            <button x-on:click="resetClock()" class="bg-gray-600 px-4 py-2 text-white mb-2 rounded-md mt-2">Reset back to 10:00</button>
+            <button x-on:click="resetClock()" class="bg-gray-600 px-4 py-2 text-white mb-2 rounded-md mt-2 hover:opacity-60">Reset back to 8:00</button>
         </div>
-        <div class="scoreControls flex flex-row gap-x-12 mt-4 bg-gray-200  p-4">
 
-            <div class="flex-col">
-                <div>Home</div>
-                <div>
-                    <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateHomeScore(1)">+</button>
-                    <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateHomeScore(-1)">-</button>
+        <div class="scoreControls mt-4 bg-gray-200 p-4">
+            <h4 class="text-lg font-bold">Score</h4>
+            <div class="flex flex-row gap-x-12">
+                <div class="flex-col">
+                    <div>Home</div>
+                    <div>
+                        <button class="bg-gray-600 p-1 px-3 rounded-md text-white hover:opacity-60" x-on:click="updateHomeScore(1)">+</button>
+                        <button class="bg-gray-600 p-1 px-3 rounded-md text-white hover:opacity-60" x-on:click="updateHomeScore(-1)">-</button>
+                    </div>
+                </div>
+                <div class="flex-col">
+                    <div>Away</div>
+                    <div>
+                        <button class="bg-gray-600 p-1 px-3 rounded-md text-white hover:opacity-60" x-on:click="updateAwayScore(1)">+</button>
+                        <button class="bg-gray-600 p-1 px-3 rounded-md text-white hover:opacity-60" x-on:click="updateAwayScore(-1)">-</button>
+                    </div>
                 </div>
             </div>
-            <div class="flex-col">
-                <div>Away</div>
-                <div>
-                    <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateAwayScore(1)">+</button>
-                    <button class="bg-gray-600 p-1 px-3 rounded-md text-white" x-on:click="updateAwayScore(-1)">-</button>
+        </div>
+
+        <div class="quarterControls mt-4 bg-gray-200 p-4">
+            <h4 class="text-lg font-bold">Quarter</h4>
+            <div class="flex flex-row gap-x-12">
+                <div class="flex-col">
+                    <div class="mb-2">Current: <span x-html="quarter"></span></div>
+                    <div>
+                        <button class="bg-gray-600 p-1 px-3 rounded-md text-white hover:opacity-60" x-on:click="updateQuarter(1)">+</button>
+                        <button class="bg-gray-600 p-1 px-3 rounded-md text-white hover:opacity-60" x-on:click="updateQuarter(-1)">-</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="controls flex-col gap-y-2 bg-gray-100  mt-4 p-4">
+        <h4 class="text-lg font-bold">Team choice</h4>
+        <div class="flex gap-x-8">
+            <div>
+                <h4 class="font-bold mb-2">Home team</h4>
+                <div class="flex justify-start items-center flex-row gap-x-2">
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="hometeam.name = 'CC Oerias'; hometeam.flag = 'img/flags/por.svg'">Oerias</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="hometeam.name = 'Glasgow'; hometeam.flag = 'img/flags/sco.svg'">Glasgow</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="hometeam.name = 'Bonson'; hometeam.flag = 'img/flags/fr.svg'">Bonson</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="hometeam.name = 'Newport'; hometeam.flag = 'img/flags/wal.svg'">Newport</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="hometeam.name = 'Tornadoes'; hometeam.flag = 'img/flags/eng.svg'">Tornadoes</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="hometeam.name = 'Kocaeli'; hometeam.flag = 'img/flags/tur.svg'">Kocaeli</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="hometeam.name = 'Dolphins'; hometeam.flag = 'img/flags/svk.svg'">Dolphins</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="hometeam.name = 'Cardiff'; hometeam.flag = 'img/flags/wal.svg'">Cardiff</div>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-bold mb-2">Away team</h4>
+                <div class="flex justify-start items-center flex-row gap-x-2">
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="awayteam.name = 'CC Oerias'; awayteam.flag = 'img/flags/por.svg'">Oerias</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="awayteam.name = 'Glasgow'; awayteam.flag = 'img/flags/sco.svg'">Glasgow</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="awayteam.name = 'Bonson'; awayteam.flag = 'img/flags/fr.svg'">Bonson</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="awayteam.name = 'Newport'; awayteam.flag = 'img/flags/wal.svg'">Newport</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="awayteam.name = 'Tornadoes'; awayteam.flag = 'img/flags/eng.svg'">Tornadoes</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="awayteam.name = 'Kocaeli'; awayteam.flag = 'img/flags/tur.svg'">Kocaeli</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="awayteam.name = 'Dolphins'; awayteam.flag = 'img/flags/svk.svg'">Dolphins</div>
+                    <div class="rounded-md cursor-pointer hover:opacity-60 bg-gray-200 p-1" x-on:click="awayteam.name = 'Cardiff'; awayteam.flag = 'img/flags/wal.svg'">Cardiff</div>
                 </div>
             </div>
         </div>
@@ -61,16 +139,37 @@
     <script>
         function timer() {
             return {
-                secondsLeft : 10 * 60,
+                secondsLeft : 8 * 60,
                 timeIsPaused: true,
                 lessThanMinuteRemaining: false,
                 homeScore : 0,
                 awayScore : 0,
                 setSeconds: 0,
                 setMinutes: 0,
-                homeTeam: 'ireland', // scotland, ireland
-                awayTeam: 'scotland',
+                quarter: 1,
+                goalImage: '',
+                showGoal: false,
+                hometeam:
+                    {
+                        name: 'Oeiras',
+                        flag: 'img/flags/por.svg',
+                    },
+                awayteam:
+                    {
+                        name: 'Glasgow',
+                        flag: 'img/flags/sco.svg',
+                    },
 
+
+                quarterNumber() {
+                    return 'Q' + this.quarter;
+                },
+                updateQuarter(number) {
+                    this.quarter += number;
+                    if(this.quarter < 0) {
+                        this.quarter = 0;
+                    }
+                },
                 /* Timer work */
                 init() {
                     this.timer = setInterval(() => {
@@ -79,8 +178,11 @@
                         }
                     }, 1000);
                 },
+                timerRunningWords() {
+                    return this.timeIsPaused ? 'paused' : 'running'
+                },
                 resetClock() {
-                    this.secondsLeft = 10 * 60;
+                    this.secondsLeft = 8 * 60;
                 },
                 togglePausedTimer() {
                     console.log("Pausing / unpausing");
@@ -124,12 +226,34 @@
                     if(this.homeScore < 0) {
                         this.homeScore = 0;
                     }
+                    if(number > 0) {
+                        this.showNewGoalAnimation();
+                    }
                 },
                 updateAwayScore(number) {
                     this.awayScore += number;
                     if(this.awayScore < 0) {
                         this.awayScore = 0;
                     }
+                    if(number > 0) {
+                        this.showNewGoalAnimation();
+                    }
+                },
+                showNewGoalAnimation() {
+                    var timestamp = new Date().getTime();
+                    this.goalImage = 'img/Vanilla-1s-280px.gif?time=' + timestamp;
+                    this.showGoal = true;
+                    var self = this;
+                    setTimeout(function($this) {
+                        self.hideGoal()
+                    }, 3000);
+                },
+                hideGoal() {
+                    var self = this;
+                    this.showGoal = false;
+                    setTimeout(function(self) {
+                        self.goalImage = '';
+                    }, 1000);
                 },
                 score() {
                     return {
